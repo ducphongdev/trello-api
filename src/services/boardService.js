@@ -1,4 +1,5 @@
 /* eslint-disable no-useless-catch */
+import lodash, { cloneDeep } from 'lodash'
 import { StatusCodes } from 'http-status-codes'
 import { boardModal } from '~/models/boardModel'
 import ApiError from '~/utils/ApiError'
@@ -28,7 +29,18 @@ const getDetails = async (boardId) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found')
     }
 
-    return board
+    const resBoard = cloneDeep(board)
+    resBoard.columns.forEach((column) => {
+      column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
+    })
+
+    // resBoard.columns.forEach((column) => {
+    //   column.cards = resBoard.cards.filter(card => card.columnId.toString() === column._id.toString())
+    // })
+
+    delete resBoard.cards
+
+    return resBoard
   } catch (error) {
     throw error
   }
