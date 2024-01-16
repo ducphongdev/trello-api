@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb'
 import { GET_DB } from '~/config/mongodb'
 import { BOARD_TYPES } from '~/utils/constants'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
-import { columnModel } from './columnModal'
+import { columnModel } from './columnModel'
 import { cardModel } from './cardModel'
 
 const BOARD_COLLECTION_NAME = 'boards'
@@ -68,16 +68,29 @@ const getDetails = async (id) => {
       } }
     ]).toArray()
 
-    return result[0] || {}
+    return result[0] || null
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+// Push một columnId vào cuối bảng columnOrderIds
+const pushColumnOrderIds = async (column) => {
+  try {
+    return await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(column.boardId) },
+      { $push: { columnOrderIds:  new ObjectId(column._id) } },
+      { returnDocument: 'after' }
+    ).value || null
   } catch (error) {
     throw new Error(error)
   }
 }
 
-export const boardModal = {
+export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
   createNew,
   findOneById,
-  getDetails
+  getDetails,
+  pushColumnOrderIds
 }
