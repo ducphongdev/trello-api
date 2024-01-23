@@ -38,7 +38,6 @@ const createNew = async (data) => {
   }
 }
 
-
 const findOneById = async (id) => {
   try {
     return await GET_DB().collection(CARD_COLLECTION_NAME).findOne({

@@ -20,6 +20,7 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
+const INVALID_UPDATE_FIELDS = ['id', 'boardId', 'createdAt']
 
 const validateBeforeCreate = async (data) => {
   return await COLUMN_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
@@ -39,12 +40,29 @@ const createNew = async (data) => {
   }
 }
 
-
 const findOneById = async (id) => {
   try {
     return await GET_DB().collection(COLUMN_COLLECTION_NAME).findOne({
       _id: new ObjectId(id)
     })
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const update = async (columnId, updateData) => {
+  try {
+    // Lọc những field mà không cho phép cập nhật
+    Object.keys(updateData).forEach(fileName => {
+      if (INVALID_UPDATE_FIELDS.includes(fileName)) {
+        delete updateData[fileName]
+      }
+    })
+    return await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(columnId) },
+      { $set: updateData },
+      { returnDocument: 'after' }
+    )
   } catch (error) {
     throw new Error(error)
   }
@@ -57,7 +75,7 @@ const pushCardOrderIds = async (card) => {
       { _id: new ObjectId(card.columnId) },
       { $push: { cardOrderIds:  new ObjectId(card._id) } },
       { returnDocument: 'after' }
-    ).value || null
+    ).value
   } catch (error) {
     throw new Error(error)
   }
@@ -68,5 +86,6 @@ export const columnModel = {
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOneById,
+  update,
   pushCardOrderIds
 }
