@@ -84,6 +84,11 @@ const update = async (boardId, updateData) => {
         delete updateData[fileName]
       }
     })
+
+    if (updateData.columnOrderIds) {
+      updateData.columnOrderIds = updateData.columnOrderIds.map(_id => new ObjectId(_id))
+    }
+
     return await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(boardId) },
       { $set: updateData },
