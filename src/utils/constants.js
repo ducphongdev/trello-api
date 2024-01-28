@@ -10,7 +10,19 @@ const BOARD_TYPES = {
   PRIVATE: 'private'
 }
 
+const USER_ROLES = {
+  CLIENT: 'client',
+  ADMIN: 'admin'
+}
+
+const TOKEN_TIME = {
+  ACCESS_TOKE: '2h',
+  REFRESH_TOKE: '2h'
+}
+
 export {
   WHITELIST_DOMAINS,
-  BOARD_TYPES
+  BOARD_TYPES,
+  USER_ROLES,
+  TOKEN_TIME
 }
