@@ -7,6 +7,7 @@ import { cardModel } from '~/models/cardModel'
 import ApiError from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
 
+
 const createNew = async (reqBody) => {
   try {
     const newBoard = {
@@ -18,6 +19,26 @@ const createNew = async (reqBody) => {
     const getNewBoard = await boardModel.findOneById(createdBoard.insertedId)
 
     return getNewBoard
+  } catch (error) {
+    throw error
+  }
+}
+
+const getAll = async () => {
+  try {
+    const allBoard = await boardModel.getAll()
+
+    return allBoard
+  } catch (error) {
+    throw error
+  }
+}
+
+const getAllByName = async (userName) => {
+  try {
+    const allBoardOfUser = await boardModel.findAllByName(userName)
+
+    return allBoardOfUser
   } catch (error) {
     throw error
   }
@@ -89,6 +110,8 @@ const moveCardToDifferentColumn = async (reqBody) => {
 
 export const boardService = {
   createNew,
+  getAll,
+  getAllByName,
   getDetails,
   update,
   moveCardToDifferentColumn

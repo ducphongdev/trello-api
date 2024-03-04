@@ -10,9 +10,11 @@ const BOARD_COLLECTION_NAME = 'boards'
 const BOARD_COLLECTION_SCHEMA = Joi.object({
   title: Joi.string().required().strict(),
   slug: Joi.string().required().strict(),
-  description: Joi.string().required().strict(),
+  description: Joi.string(),
 
+  owner: Joi.string().required().strict(),
   type: Joi.string().valid(BOARD_TYPES.PUBLIC, BOARD_TYPES.PRIVATE).required(),
+  prefs: Joi.object().required().strict(),
 
   columnOrderIds: Joi.array().items(
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
@@ -39,6 +41,10 @@ const createNew = async (data) => {
   }
 }
 
+const getAll = async () => {
+  return await GET_DB().collection(BOARD_COLLECTION_NAME).find({}).toArray()
+}
+
 const findOneById = async (id) => {
   try {
     return await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
@@ -48,6 +54,17 @@ const findOneById = async (id) => {
     throw new Error(error)
   }
 }
+
+const findAllByName = async (userName) => {
+  try {
+    return await GET_DB().collection(BOARD_COLLECTION_NAME).find({
+      owner: userName
+    }).toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 
 const getDetails = async (id) => {
   try {
@@ -116,7 +133,9 @@ export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
   createNew,
+  getAll,
   findOneById,
+  findAllByName,
   getDetails,
   pushColumnOrderIds,
   update

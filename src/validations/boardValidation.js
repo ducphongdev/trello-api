@@ -7,13 +7,15 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 const createNew = async (req, res, next) => {
   const correctCondition = Joi.object({
     title: Joi.string().required().strict(),
-    description: Joi.string().required().strict(),
-
-    type: Joi.string().valid(BOARD_TYPES.PUBLIC, BOARD_TYPES.PRIVATE).required()
+    description: Joi.string(),
+    owner: Joi.string().required().strict(),
+    type: Joi.string().valid(BOARD_TYPES.PUBLIC, BOARD_TYPES.PRIVATE).required(),
+    prefs: Joi.object().required().strict()
   })
 
   try {
     await correctCondition.validateAsync(req.body, { abortEarly: false })
+
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
