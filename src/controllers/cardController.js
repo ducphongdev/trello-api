@@ -11,6 +11,42 @@ const createNew = async (req, res, next) => {
   }
 }
 
+const getDetails = async (req, res, next) => {
+  try {
+    const cardId = req.params.id
+    const card = await cardService.getDetails(cardId)
+    res.status(StatusCodes.OK).json(card)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const update = async (req, res, next) => {
+  try {
+    const cardId = req.params.id
+
+    const updateCard = await cardService.update(cardId, req.body)
+    res.status(StatusCodes.OK).json(updateCard)
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+const partialUpdate = async (req, res, next) => {
+  try {
+    const cardId = req.params.id
+
+    const updateCard = await cardService.partialUpdate(cardId, req.body)
+    res.status(StatusCodes.OK).json(updateCard)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const cardController = {
-  createNew
+  createNew,
+  getDetails,
+  update,
+  partialUpdate
 }

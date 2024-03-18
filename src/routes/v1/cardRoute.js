@@ -1,16 +1,24 @@
 import express from 'express'
 import { cardController } from '~/controllers/cardController'
+import { taskItemController } from '~/controllers/taskItemController'
 import { cardValidation } from '~/validations/cardValidation'
+import { taskItemValidation } from '~/validations/taskItemValidation'
 
 const Router = express.Router()
 
 
 Router.route('/')
-  .get((req, res) => {})
   .post(cardValidation.createNew, cardController.createNew)
 
-// Router.route('/:id')
-//   .get(boardController.getDetails)
-//   .put()
+Router.route('/:id')
+  .get(cardController.getDetails)
+  .put(cardValidation.update, cardController.update)
+  .patch(cardController.partialUpdate)
+
+Router.route('/:cardId/task/:taskId/taskItem')
+  .post(taskItemValidation.createNew, taskItemController.createNew)
+
+Router.route('/:cardId/task/:taskId/taskItem/:taskItem')
+  .put(taskItemValidation.update, taskItemController.update)
 
 export const cardRoute = Router

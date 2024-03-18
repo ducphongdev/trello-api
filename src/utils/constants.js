@@ -15,6 +15,11 @@ const USER_ROLES = {
   ADMIN: 'admin'
 }
 
+const STATE_TASKITEM = {
+  INCOMPLETE: 'incomplete',
+  COMPLETE: 'complete'
+}
+
 const TOKEN_TIME = {
   ACCESS_TOKE: '2h',
   REFRESH_TOKE: '2h'
@@ -24,5 +29,6 @@ export {
   WHITELIST_DOMAINS,
   BOARD_TYPES,
   USER_ROLES,
-  TOKEN_TIME
+  TOKEN_TIME,
+  STATE_TASKITEM
 }

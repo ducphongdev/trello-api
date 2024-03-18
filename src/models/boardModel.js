@@ -65,7 +65,6 @@ const findAllByName = async (userName) => {
   }
 }
 
-
 const getDetails = async (id) => {
   try {
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
