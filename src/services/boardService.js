@@ -6,7 +6,8 @@ import { columnModel } from '~/models/columnModel'
 import { cardModel } from '~/models/cardModel'
 import ApiError from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
-
+import { getBadgeData, getCardList } from '~/transformer/card'
+import { taskItemModel } from '~/models/taskItemModel'
 
 const createNew = async (reqBody) => {
   try {
@@ -53,13 +54,35 @@ const getDetails = async (boardId) => {
     }
 
     const resBoard = cloneDeep(board)
-    resBoard.columns.forEach((column) => {
-      column.cards = resBoard.cards.filter(card => card.columnId.equals(column._id))
-    })
 
+    // resBoard.columns.forEach((column) => {
+    //   column.cards = resBoard.cards.filter((card) => {
+    //     return card.columnId.equals(column._id)
+    //   })
+    // })
     // resBoard.columns.forEach((column) => {
     //   column.cards = resBoard.cards.filter(card => card.columnId.toString() === column._id.toString())
     // })
+
+    const badgePromises = []
+
+    resBoard.columns.forEach((column) => {
+      column.cards = resBoard.cards.filter((card) => {
+        return card.columnId.equals(column._id)
+      })
+
+      column.cards.forEach((card) => {
+        // Đặt badgePromises để thêm thông tin badge vào card
+        badgePromises.push(
+          getBadgeData(card).then((badgeData) => {
+            card.badges = badgeData
+          })
+        )
+      })
+    })
+
+    // Chờ tất cả các promises hoàn thành
+    await Promise.all(badgePromises)
 
     delete resBoard.cards
 

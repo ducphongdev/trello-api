@@ -20,8 +20,6 @@ const createNew = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const taskItemId = req.params.taskItemId
-    const cardId = req.params.cardId
-    const taskId = req.params.taskId
 
     const updateTaskItem = await taskItemService.update(taskItemId, req.body)
     res.status(StatusCodes.OK).json(updateTaskItem)

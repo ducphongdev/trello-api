@@ -1,6 +1,4 @@
 /* eslint-disable no-useless-catch */
-import { StatusCodes } from 'http-status-codes'
-import ApiError from '~/utils/ApiError'
 import { boardModel } from '~/models/boardModel'
 import { slugify } from '~/utils/formatters'
 import { columnModel } from '~/models/columnModel'

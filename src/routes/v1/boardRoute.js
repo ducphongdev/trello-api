@@ -15,7 +15,6 @@ Router.route('/:id')
 Router.route('/member/:name')
   .get(boardController.getAllByName)
 
-
 Router.route('/supports/moving_card')
   .put(boardValidation.moveCardToDifferentColumn, boardController.moveCardToDifferentColumn)
 

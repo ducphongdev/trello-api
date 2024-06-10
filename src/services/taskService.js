@@ -1,8 +1,8 @@
 /* eslint-disable no-useless-catch */
-import ApiError from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
 import { taskModel } from '~/models/taskModel'
-
+import { cardModel } from '~/models/cardModel'
+import { taskItemModel } from '~/models/taskItemModel'
 
 const createNew = async (reqBody) => {
   try {
@@ -13,6 +13,10 @@ const createNew = async (reqBody) => {
     const createdTask = await taskModel.createNew(newTask)
 
     const getTask = await taskModel.findOneById(createdTask.insertedId)
+
+    if (getTask) {
+      await cardModel.pushTaskOrderIds(getTask)
+    }
 
     return getTask
   } catch (error) {
@@ -27,8 +31,7 @@ const update = async (taskId, reqBody) => {
       updatedAt: Date.now(),
       slug: slugify(reqBody.name)
     }
-
-    const updateTask = taskModel.update(taskId, updateData)
+    const updateTask = await taskModel.update(taskId, updateData)
 
     return updateTask
   } catch (error) {
@@ -38,7 +41,14 @@ const update = async (taskId, reqBody) => {
 
 const destroy = async (taskId) => {
   try {
+    const getTask = await taskModel.findOneById(taskId)
+
+    if (getTask) {
+      await cardModel.pullTaskOrderIds(getTask)
+    }
+
     await taskModel.destroy(taskId)
+    await taskItemModel.destroyMany(taskId)
 
     return {
       deleteResult: 'delete Successfully'
@@ -47,7 +57,6 @@ const destroy = async (taskId) => {
     throw error
   }
 }
-
 
 export const taskService = {
   createNew,

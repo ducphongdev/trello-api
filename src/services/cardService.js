@@ -5,6 +5,7 @@ import ApiError from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
 import { cardModel } from '~/models/cardModel'
 import { columnModel } from '~/models/columnModel'
+import { getBadgeData } from '~/transformer/card'
 
 const createNew = async (reqBody) => {
   try {
@@ -15,7 +16,7 @@ const createNew = async (reqBody) => {
     const createdCard = await cardModel.createNew(newCard)
 
     const getNewCard = await cardModel.findOneById(createdCard.insertedId)
-
+    getNewCard.badges = await getBadgeData(getNewCard)
     if (getNewCard) {
       getNewCard.cards = []
       await columnModel.pushCardOrderIds(getNewCard)
@@ -35,7 +36,16 @@ const getDetails = async (cardId) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Card not found')
     }
 
-    return card
+    const resCard = cloneDeep(card)
+    resCard.badges = await getBadgeData(card)
+    resCard.tasks.forEach((task) => {
+      task.taskItems = resCard.taskItems.filter((taskItems) =>
+        taskItems.taskId.equals(task._id)
+      )
+    })
+    delete resCard.taskItems
+
+    return resCard
   } catch (error) {
     throw error
   }
@@ -48,22 +58,8 @@ const update = async (cardId, reqBody) => {
       updatedAt: Date.now()
     }
 
-    const updateCard = cardModel.update(cardId, updateData)
-
-    return updateCard
-  } catch (error) {
-    throw error
-  }
-}
-
-const partialUpdate = async (cardId, reqBody) => {
-  try {
-    const updateData = {
-      ...reqBody,
-      updatedAt: Date.now()
-    }
-
-    const updateCard = cardModel.partialUpdate(cardId, updateData)
+    const updateCard = await cardModel.update(cardId, updateData)
+    updateCard.badges = await getBadgeData(updateCard)
 
     return updateCard
   } catch (error) {
