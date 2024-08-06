@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { authService } from '~/services/authService'
-
+import ApiError from '~/utils/ApiError'
 
 const login = async (req, res, next) => {
   try {
@@ -11,6 +11,20 @@ const login = async (req, res, next) => {
   }
 }
 
+const refresh = async (req, res, next) => {
+  try {
+    const refresh_token = req.body.refresh_token
+    if (!refresh_token) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid refresh token')
+    }
+    const response = await authService.processNewToken(refresh_token)
+    res.status(StatusCodes.OK).json({
+      ...response
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 const register = async (req, res, next) => {
   try {
@@ -21,7 +35,17 @@ const register = async (req, res, next) => {
   }
 }
 
+const logout = async (req, res, next) => {
+  try {
+    res.status(StatusCodes.OK).json({ message: 'Logged out successfully!' })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const authController = {
   login,
-  register
+  refresh,
+  register,
+  logout
 }

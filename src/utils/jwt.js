@@ -18,9 +18,8 @@ const createJwt = (user, key, expiresIn) => {
   )
 }
 
-const attachCookiesToResponse = (res, user, expiresIn) => {
+const createAccessToken = (res, user, expiresIn) => {
   const accessToken = createJwt(user, env.JWT_ACCESS_KEY, expiresIn)
-  const refreshToken = createJwt(user, env.JWT_REFRESH_KEY, expiresIn)
 
   res.cookie('access_token', accessToken, {
     httpOnly: true,
@@ -28,43 +27,50 @@ const attachCookiesToResponse = (res, user, expiresIn) => {
     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     secure: env.BUILD_MODE === 'production'
   })
+
+  return accessToken
+}
+
+const createRefreshToken = (res, user, expiresIn) => {
+  const refreshToken = createJwt(user, env.JWT_REFRESH_KEY, expiresIn)
+
   res.cookie('refresh_token', refreshToken, {
     httpOnly: true,
     sameSite: env.BUILD_MODE === 'dev' ? 'lax' : 'none',
     expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     secure: env.BUILD_MODE === 'production'
   })
+
+  return refreshToken
 }
 
 const requestRefreshToken = async (refreshToken) => {
-  try {
+  return new Promise((resolve, reject) => {
     jwt.verify(refreshToken, env.JWT_REFRESH_KEY, (error, user) => {
       if (error) {
-        throw new ApiError(StatusCodes.UNAUTHORIZED, error.message)
+        reject(new ApiError(StatusCodes.UNAUTHORIZED, error.message))
       }
-      const newAccessToken = createJwt(
+      const access_token = createJwt(
         user,
         env.JWT_ACCESS_KEY,
-        TOKEN_TIME.ACCESS_TOKE
+        TOKEN_TIME.ACCESS_TOKEN
       )
-      const newRefreshToken = createJwt(
+      const refresh_token = createJwt(
         user,
         env.JWT_REFRESH_KEY,
-        TOKEN_TIME.REFRESH_TOKE
+        TOKEN_TIME.REFRESH_TOKEN
       )
-
-      return {
-        newAccessToken,
-        newRefreshToken
-      }
+      resolve({
+        access_token,
+        refresh_token
+      })
     })
-  } catch (error) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, error.message)
-  }
+  })
 }
 
 export const jwtToken = {
   createJwt,
-  attachCookiesToResponse,
-  requestRefreshToken
+  requestRefreshToken,
+  createAccessToken,
+  createRefreshToken
 }

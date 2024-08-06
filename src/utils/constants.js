@@ -21,8 +21,8 @@ const STATE_TASKITEM = {
 }
 
 const TOKEN_TIME = {
-  ACCESS_TOKE: '2h',
-  REFRESH_TOKE: '2h'
+  ACCESS_TOKEN: '7d',
+  REFRESH_TOKEN: '12d'
 }
 
 export {

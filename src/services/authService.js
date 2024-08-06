@@ -6,29 +6,52 @@ import bcrypt from 'bcrypt'
 import { jwtToken } from '~/utils/jwt'
 import { TOKEN_TIME } from '~/utils/constants'
 
-
 const login = async (reqBody, res) => {
   try {
     const user = await userModel.findOneByEmail(reqBody.email)
     if (!user) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Thông tin đăng nhập không đúng')
+      throw new ApiError(
+        StatusCodes.NOT_FOUND,
+        'Địa chỉ email và/hoặc mật khẩu không chính xác'
+      )
     }
 
-    const validPassword = bcrypt.compareSync(
-      reqBody.password,
-      user.password
-    )
+    const validPassword = bcrypt.compareSync(reqBody.password, user.password)
 
     if (!validPassword) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Thông tin đăng nhập không đúng')
+      throw new ApiError(
+        StatusCodes.NOT_FOUND,
+        'Địa chỉ email và/hoặc mật khẩu không chính xác'
+      )
     }
 
-    jwtToken.attachCookiesToResponse(res, user, TOKEN_TIME.ACCESS_TOKE)
-    jwtToken.attachCookiesToResponse(res, user, TOKEN_TIME.REFRESH_TOKE)
+    const access_token = jwtToken.createAccessToken(
+      res,
+      user,
+      TOKEN_TIME.ACCESS_TOKEN
+    )
+    const refresh_token = jwtToken.createRefreshToken(
+      res,
+      user,
+      TOKEN_TIME.REFRESH_TOKEN
+    )
 
     // eslint-disable-next-line no-unused-vars
     const { password, ...infoUser } = user
-    return infoUser
+    return {
+      access_token,
+      refresh_token,
+      user: infoUser
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const processNewToken = async (refreshToken) => {
+  try {
+    const token = await jwtToken.requestRefreshToken(refreshToken)
+    return token
   } catch (error) {
     throw error
   }
@@ -58,5 +81,6 @@ const register = async (reqBody) => {
 
 export const authService = {
   login,
+  processNewToken,
   register
 }
